@@ -2,6 +2,7 @@ Release/
 Debug/
 export/
 .vs/
+*.vcxproj.user
 
 # Prerequisites
 *.d

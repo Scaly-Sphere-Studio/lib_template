@@ -1,78 +1,70 @@
-# Set PLATFORM_DIR
+# --- FUNCTIONS & VARIABLES ---
+
+# CopyBinary copies the given file to the given folder. Fatal if it does not exist
+function(CopyBinary src_dir file_name relative_dst)
+    message(STATUS "> ${file_name}")
+    # Ensure binary is present
+    if (NOT EXISTS "${src_dir}/${file_name}")
+        message(FATAL_ERROR "File does not exist: ${src_dir}/${file_name}")
+    endif()
+    # Copy file
+    file(COPY "${src_dir}/${file_name}" DESTINATION "${CURRENT_PACKAGES_DIR}/${relative_dst}")
+endfunction()
+
+# arch_dir is the path to the current architecture build, fatal if unsupported architecture
 if (VCPKG_TARGET_ARCHITECTURE STREQUAL "x86")
-    set(PLATFORM_DIR "")
+    set(arch_dir "")
 elseif (VCPKG_TARGET_ARCHITECTURE STREQUAL "x64")
-    set(PLATFORM_DIR "x64")
+    set(arch_dir "x64")
 else()
     message(FATAL_ERROR "Unsupported architecture: ${VCPKG_TARGET_ARCHITECTURE}")
 endif()
 
-# Set BUILD_DIR
-if (NOT VCPKG_BUILD_TYPE OR VCPKG_BUILD_TYPE STREQUAL "release")
-    set(BUILD_DIR "Release")
-endif()
-if (NOT VCPKG_BUILD_TYPE OR VCPKG_BUILD_TYPE STREQUAL "debug")
-    set(BUILD_DIR "Debug")
-endif()
+# Set paths to headers
+set(base_dir "${CMAKE_CURRENT_LIST_DIR}")
+set(inc_dir  "${base_dir}/include")
+get_filename_component(pkg_name "${base_dir}" NAME)
 
-# Set paths to binaries and headers
-set(BASE_DIR "${CMAKE_CURRENT_LIST_DIR}")
-get_filename_component(PKG_NAME "${BASE_DIR}" NAME)
-set(INC_DIR  "${BASE_DIR}/include")
-set(DLL_PATH "${BASE_DIR}/${PLATFORM_DIR}/${BUILD_DIR}/${PKG_NAME}.dll")
-set(PDB_PATH "${BASE_DIR}/${PLATFORM_DIR}/${BUILD_DIR}/${PKG_NAME}.pdb")
-set(LIB_PATH "${BASE_DIR}/${PLATFORM_DIR}/${BUILD_DIR}/${PKG_NAME}.lib")
+# --- BINARIES ---
 
-# Ensure binaries are present
-if (NOT EXISTS "${DLL_PATH}")
-    message(FATAL_ERROR "File does not exist: ${DLL_PATH}")
-endif()
-if (NOT EXISTS "${PDB_PATH}")
-    message(FATAL_ERROR "File does not exist: ${PDB_PATH}")
-endif()
-if (NOT EXISTS "${LIB_PATH}")
-    message(FATAL_ERROR "File does not exist: ${LIB_PATH}")
-endif()
-
-# Create directories: /bin, lib/, include/, debug/, and share/
-if (NOT VCPKG_BUILD_TYPE OR VCPKG_BUILD_TYPE STREQUAL "release")
-    file(MAKE_DIRECTORY
-        "${CURRENT_PACKAGES_DIR}/bin"
-        "${CURRENT_PACKAGES_DIR}/lib"
-    )
-endif()
-if (NOT VCPKG_BUILD_TYPE OR VCPKG_BUILD_TYPE STREQUAL "debug")
-    file(MAKE_DIRECTORY
-        "${CURRENT_PACKAGES_DIR}/debug/bin"
-        "${CURRENT_PACKAGES_DIR}/debug/lib"
-    )
-endif()
-file(MAKE_DIRECTORY
-    "${CURRENT_PACKAGES_DIR}/include/SSS"
-    "${CURRENT_PACKAGES_DIR}/share/${PKG_NAME}"
-)
-
-# Copy .dll, .lib, and headers
+# Release
 if (NOT VCPKG_BUILD_TYPE OR VCPKG_BUILD_TYPE STREQUAL "release")
     message(STATUS "Copying release binaries...")
-    file(COPY ${DLL_PATH}  DESTINATION "${CURRENT_PACKAGES_DIR}/bin")
-    file(COPY ${PDB_PATH}  DESTINATION "${CURRENT_PACKAGES_DIR}/bin")
-    file(COPY ${LIB_PATH}  DESTINATION "${CURRENT_PACKAGES_DIR}/lib")
+    # Copy binaries
+    set(build_dir "${base_dir}/${arch_dir}/Release")
+    CopyBinary(${build_dir} "${pkg_name}.lib" "lib")
 endif()
+
+# Debug
 if (NOT VCPKG_BUILD_TYPE OR VCPKG_BUILD_TYPE STREQUAL "debug")
     message(STATUS "Copying debug binaries...")
-    file(COPY ${DLL_PATH}  DESTINATION "${CURRENT_PACKAGES_DIR}/debug/bin")
-    file(COPY ${PDB_PATH}  DESTINATION "${CURRENT_PACKAGES_DIR}/debug/bin")
-    file(COPY ${LIB_PATH}  DESTINATION "${CURRENT_PACKAGES_DIR}/debug/lib")
+    # Copy binaries
+    set(build_dir "${base_dir}/${arch_dir}/Debug")
+    CopyBinary(${build_dir} "${pkg_name}.lib" "debug/lib")
 endif()
-message(STATUS "Copying headers...")
-file(GLOB HEADERS_PATH
-  "${INC_DIR}/*.h"
-)
-file(COPY
-    "${HEADERS_PATH}"
-    DESTINATION "${CURRENT_PACKAGES_DIR}/include/SSS"
-)
 
-# Create copyright file
-file(WRITE "${CURRENT_PACKAGES_DIR}/share/${PKG_NAME}/copyright" "SSS use only")
+# --- HEADERS ---
+
+message(STATUS "Copying headers...")
+# Retrieve all headers
+file(GLOB_RECURSE headers "${inc_dir}/*.h")
+# Copy headers keeping directory structure
+foreach (header ${headers})
+    # Retrieve relative path
+    file(RELATIVE_PATH relative_header "${inc_dir}" "${header}")
+    message(STATUS "> ${relative_header}")
+    # Set absolute path of target file accordingly
+    set(target_file "${CURRENT_PACKAGES_DIR}/include/${relative_header}")
+    # Extract directory
+    get_filename_component(target_dir ${target_file} DIRECTORY)
+    # Copy header to that directory
+    file(COPY ${header} DESTINATION ${target_dir})
+endforeach()
+
+# --- SHARE ---
+
+message(STATUS "Copying copyright...")
+# Create share folder
+file(MAKE_DIRECTORY "${CURRENT_PACKAGES_DIR}/share/${pkg_name}")
+# Write copyright file
+file(WRITE "${CURRENT_PACKAGES_DIR}/share/${pkg_name}/copyright" "SSS use only")
