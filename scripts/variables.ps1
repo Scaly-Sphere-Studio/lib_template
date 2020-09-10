@@ -10,8 +10,9 @@ $pkg_dir    = Resolve-Path "..";
 $inc_dir    = "$pkg_dir\inc";
 
 # Export directory and archive, to be created
-$export_dir = "$pkg_dir\export\$pkg_name"
-$export_zip = "$export_dir.zip"
+$export_dir = "$pkg_dir\export"
+$export_pkg = "$export_dir\$pkg_name"
+$export_zip = "$export_dir\$pkg_name.zip"
 
 # Path extension to access scripts from VCPKG_OVERLAY_PORTS
 $path_ext   = $env:VCPKG_OVERLAY_PORTS.Split(';') `
