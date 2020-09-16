@@ -1,3 +1,0 @@
-[submodule "vcpkg_scripts"]
-	path = vcpkg_scripts
-	url = http://github.com/Scaly-Sphere-Studio/vcpkg_scripts
