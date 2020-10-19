@@ -25,7 +25,8 @@ This will allow the installed scripts to compile the project.
 
 ## Run the Visual Studio project to edit the target's name
 - **en** : Project -> Properties of _[project's name]_ -> Configuration properties -> General -> Target Name
-- **fr** : Projet -> Propriétés de _[nom du projet]_ -> Propriétés de la configuration -> Général -> Nom de la cible<br/>
+- **fr** : Projet -> Propriétés de _[nom du projet]_ -> Propriétés de la configuration -> Général -> Nom de la cible
+
 The name must match the `Source:` parameter in [CONTROL](CONTROL).<br/>
 In the previous example, it should be `sss-text-rendering`.
 
@@ -41,7 +42,8 @@ This script builds the project in 4 different configs :
 - win32 Debug
 - win32 Release
 - x64 Debug
-- x64 Release<br/>
+- x64 Release
+
 Then, it exports the project to a `.zip` file ready to be installed via `vcpkg`.
 
 ## local_install.ps1
