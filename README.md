@@ -41,7 +41,7 @@ This script builds the project in 4 different configs :
 - win32 Debug
 - win32 Release
 - x64 Debug
-- x64 Release
+- x64 Release<br/>
 Then, it exports the project to a `.zip` file ready to be installed via `vcpkg`.
 
 ## local_install.ps1
