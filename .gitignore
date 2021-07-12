@@ -1,6 +1,5 @@
 Release/
 Debug/
-export/
 .vs/
 *.vcxproj.user
 
