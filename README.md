@@ -44,7 +44,7 @@ Set-ExecutionPolicy Bypass
   - Arguments: `-noexit -File %1`
 - Click "Ok", then "Set as Default"
 
-## 3) Double click on `InstallScript.ps1`
+## 3) Double click on `DownloadVcpkgScripts.ps1`
 This will add [vcpkg_scripts](https://github.com/Scaly-Sphere-Studio/vcpkg_scripts) as a git submodule to this repository.<br/>
 _NOTE :_ Simply run this script again to update the scripts when needed.
 
